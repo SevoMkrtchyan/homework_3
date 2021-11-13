@@ -3,6 +3,9 @@ package util;
 import model.Customer;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -11,6 +14,7 @@ import java.util.stream.Collectors;
 public class FileManipulator {
 
     private static final String FILES_DIR = "/home/sevo/IdeaProjects/homework_3/data/";
+    private static final String CACHE = "/home/sevo/IdeaProjects/homework_3/temp";
     private static final List<Customer> CUSTOMERS = new ArrayList<>();
 
     // TODO: 13.11.21 1. Receives a file as a command line parameter. 
@@ -45,6 +49,36 @@ public class FileManipulator {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    // TODO: 14.11.21  TASK 3
+    public static void cleanCache() {
+        try {
+            List<File> files = Files.list(Paths.get(CACHE)).map(Path::toFile).collect(Collectors.toList());
+            if (!files.isEmpty()) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        deleteFile(file);
+                    } else if (file.isDirectory()) {
+                        List<File> filesFromSub = Files.list(Paths.get(file.getAbsolutePath())).map(Path::toFile).collect(Collectors.toList());
+                        if (!filesFromSub.isEmpty()) {
+                            for (File fileFromSub : filesFromSub) {
+                                deleteFile(fileFromSub);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static void deleteFile(File file) {
+        if (file.getName().contains(".tmp")) {
+            file.deleteOnExit();
         }
     }
 }
